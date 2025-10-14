@@ -39,7 +39,7 @@ class GradusApp:
         button_frame.pack(side="top", fill="x")
 
         self.frames = {}
-        for name in ["Home", "Grade Checker", "Career Planner", "FROST"]:
+        for name in ["Home", "Grade Checker", "Career Planner", "FROST"]: #Create the UI for the four buttons for four modules
             frame = tk.Frame(root)
             frame.place(x=0, y=50, relwidth=1, relheight=1)
             self.frames[name] = frame
@@ -54,6 +54,7 @@ class GradusApp:
         self.career_planner.build()
         self.frost.build()
 
+        #Create the buttons on the Home screen
         tk.Button(button_frame, text="Home", command=lambda: self.show_frame("Home")).pack(side="left", expand=True)
         tk.Button(button_frame, text="Grade Checker", command=lambda: self.show_frame("Grade Checker")).pack(side="left", expand=True)
         tk.Button(button_frame, text="Cereer Planner", command=lambda: self.show_frame("Career Planner")).pack(side="left", expand=True)
@@ -65,7 +66,8 @@ class GradusApp:
         for frame in self.frames.values():
             frame.lower()
         self.frames[name].lift()
-    
+
+#Develop the class for the Home screen
 class Home:
     def __init__(self, frame):
         self.frame = frame
@@ -91,6 +93,7 @@ class GradeChecker:
         course_menu.pack(pady=5)
         tk.Button(self.frame, text="Check Entry", command=self.grade_check).pack(pady=10)
 
+    #Develop the function for the grade_checking module
     def grade_check(self):
         try:
             rank_score = int(self.rank_score_entry.get())
@@ -120,6 +123,7 @@ class CareerPlanner:
         user_interest_menu.pack(pady=5)
         tk.Button(self.frame, text="Suggest Careers", command=self.career_suggestion).pack(pady=10)
 
+    #The development of the core function for the career planner
     def career_suggestion(self):
         selected_field_of_interest = self.user_interest_var.get()
         careers = career_options.get(selected_field_of_interest, {})
@@ -135,6 +139,7 @@ class FROST:
         self.frame = frame
         global frostQA
     
+    #Build the user input for the asking FROST questions
     def build(self):
         tk.Label(self.frame, text="FROST", font=("Arial", 14)).pack(pady=10)
         for question, answer in frostQA.items():
