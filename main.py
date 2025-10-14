@@ -1,148 +1,147 @@
 import tkinter as tk
-import time
 from tkinter import messagebox
 
-#List some sample courses that are available
-courses = {
-    "Bachelor of Science (Majored in Biomed)": {
-        "rank_score_required": 280,
-        "subject_requirement": ["None"]
-    },
-    "Bachelor of Engineering (Honours)": {
-        "rank_score_required": 260,
-        "subject_requirement": ["Calculus", "Physics"]
-    }
-}
+class User: #Create the class for user information
+    def __init__(self):
+        self.interests = []
+        self.strengths = []
+    
+    #Buttons and functions for adding and removing interests and strengths
+    def add_interest(self, interest):
+        if interest and interest not in self.interests:
+            self.interests.append(interest)
 
-#List some career options that are available
-career_options = {
-    "Science": ["Biomedical Scientist", "Pharmacist", "Geneticist"],
-    "Technology": ["Software Engineer", "Data Analyst", "Urban Planning"],
-    "Health": ["Nurse", "Public Health Advisor", "Surgeon"]
-}
+    def add_strength(self, strength):
+        if strength and strength not in self.strengths:
+            self.strengths.append(strength)
 
-#List some possible career questions and answers for FROST module
-frostQA = {
-    "What is NCEA?": "NCEA stands for the National Certificate of Educational Achievement, and is the main secondary qualification in NZ. ",
-    "What is a rank score?": "A rank score is a calculated score used by University of Auckland (and some majors in Auckland University of Technology) based on a student's NCEA results. ",
-    "What is the University Entrance?": "University Entrance is the minimum requirement needed for a secondary student to have tertiary study in NZ with NCEA. It includes NCEA Level 3, 14 credits at Level 3 in each of three approved subjects, 10 Literacy credits at Level 2 or above made up of 5 reading and 5 writing, along with 0 Literacy credits at Level 2 or above. "
-}
+    def remove_interest(self, interest):
+        if interest in self.interests:
+            self.interests.remove(interest)
 
-#Develop the class for my UI and home page
-class GradusApp:
+    def remove_strength(self, strength):
+        if strength in self.strengths:
+            self.strengths.remove(strength)
+
+    def get_profile(self):
+        return f"Interests: {', '.join(self.interests) or 'None'}\nStrengths: {', '.join(self.strengths) or 'None'}"
+
+class CareerPlanner:
+    def __init__(self, user_profile):
+        self.user_profile = user_profile
+        self.career_database = { #Really simple database, but extended compared to previous one
+            "physics": ["Engineering", "Aviation", "Architecture"],
+            "math": ["Engineering", "Data Science", "Finance"],
+            "biology": ["Medicine", "Biotechnology", "Environmental Science"],
+            "english": ["Communications", "Teaching", "Law"],
+            "chemistry": ["Pharmacy", "Food Science", "Chemical Engineering"],
+            "computer science": ["Software Development", "Cybersecurity", "AI Research"]
+        }
+
+    def suggest_career(self): #Create the core function of the program that suggests careers based on previous user inputs
+        suggest = set()
+        for item in self.user_profile.interests + self.user_profile.strengths:
+            stuff = item.lower()
+            if stuff in self.career_database:
+                suggest.update(self.career_database[stuff])
+        if suggest:
+            return f"Suggested Careers:\n- " + "\n- ".join(suggest)
+        else:
+            return "No suggestions available."
+
+class CareerPlannerApp: #Create the class for the app itself, which is also the UI
     def __init__(self, root):
         self.root = root
-        self.root.title("Gradus(V1) - Alec Pan")
-        self.root.geometry("400x600")
+        self.root.title("Gradus - Career Planner - Version 3")
+        self.user = User()
+        self.planner = CareerPlanner(self.user)
+        self.create_home_screen()
 
-        button_frame = tk.Frame(root)
-        button_frame.pack(side="top", fill="x")
+    def frame_clearing(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
 
-        self.frames = {}
-        for name in ["Home", "Grade Checker", "Career Planner", "FROST"]:
-            frame = tk.Frame(root)
-            frame.place(x=0, y=50, relwidth=1, relheight=1)
-            self.frames[name] = frame
+    def create_home_screen(self): #Create the home screen in forms of UI
+        self.frame_clearing()
+        tk.Label(self.root, text="Welcome to Gradus Career Planner", font=("Arial", 18, "bold")).pack(pady=10) #Creates and labels the buttons. Same as below
+        tk.Label(self.root, text="Select an option below:", font=("Arial", 12)).pack(pady=5)
+        tk.Button(self.root, text="Add Interest", width=20, command=self.show_add_interest).pack(pady=5)
+        tk.Button(self.root, text="Add Strength", width=20, command=self.show_add_strength).pack(pady=5)
+        tk.Button(self.root, text="View Profile", width=20, command=self.show_profile).pack(pady=5)
+        tk.Button(self.root, text="Remove Interest", width=20, command=self.show_remove_interest).pack(pady=5)
+        tk.Button(self.root, text="Remove Strength", width=20, command=self.show_remove_strength).pack(pady=5)
+        tk.Button(self.root, text="Suggest Career", width=20, command=self.show_suggestions).pack(pady=5)
+        tk.Button(self.root, text="Exit", width=20, command=self.root.quit).pack(pady=5)
 
-        self.home = Home(self.frames["Home"])
-        self.grade_checker = GradeChecker(self.frames["Grade Checker"])
-        self.career_planner = CareerPlanner(self.frames["Career Planner"])
-        self.frost = FROST(self.frames["FROST"])
+    def show_add_interest(self): #The function to show the UI of adding interest. Same as below
+        self.frame_clearing()
+        tk.Label(self.root, text="Add Interest", font=("Arial", 12)).pack(pady=5)
+        tk.Label(self.root, text="Possible subjects: Physics, Maths, Biology, English, Chemistry and Computer Science.", font=("Arial", 8)).pack(pady=10) #Display a text to show users possible options
+        entry = tk.Entry(self.root, width=30)
+        entry.pack(pady=5)
+        tk.Button(self.root, text="Add", command=lambda: self.add_interest(entry.get())).pack(pady=5)
+        tk.Button(self.root, text="Back", command=self.create_home_screen).pack(pady=10)
 
-        self.home.build()
-        self.grade_checker.build()
-        self.career_planner.build()
-        self.frost.build()
+    def add_interest(self, interest): #Function of adding interest itself. Same as below
+        self.user.add_interest(interest)
+        messagebox.showinfo("Success", f"Added interest: {interest}") #Tell the user that the typed interest is successfully added
+        self.create_home_screen()
 
-        tk.Button(button_frame, text="Home", command=lambda: self.show_frame("Home")).pack(side="left", expand=True)
-        tk.Button(button_frame, text="Grade Checker", command=lambda: self.show_frame("Grade Checker")).pack(side="left", expand=True)
-        tk.Button(button_frame, text="Cereer Planner", command=lambda: self.show_frame("Career Planner")).pack(side="left", expand=True)
-        tk.Button(button_frame, text="FROST", command=lambda: self.show_frame("FROST")).pack(side="left", expand=True)
-        tk.Button(button_frame, text="Exit", command=self.root.quit).pack(side="left")
-        self.show_frame("Home")
+    def show_add_strength(self):
+        self.frame_clearing()
+        tk.Label(self.root, text="Add Strength", font=("Arial", 12)).pack(pady=5)
+        tk.Label(self.root, text="Possible subjects: Physics, Maths, Biology, English, Chemistry and Computer Science.", font=("Arial", 8)).pack(pady=10)
+        entry = tk.Entry(self.root, width=30)
+        entry.pack(pady=5)
+        tk.Button(self.root, text="Add", command=lambda: self.add_strength(entry.get())).pack(pady=5)
+        tk.Button(self.root, text="Back", command=self.create_home_screen).pack(pady=10)
 
-    def show_frame(self, name):
-        for frame in self.frames.values():
-            frame.lower()
-        self.frames[name].lift()
-    
-class Home:
-    def __init__(self, frame):
-        self.frame = frame
+    def add_strength(self, strength):
+        self.user.add_strength(strength)
+        messagebox.showinfo("Success", f"Added strength: {strength}")
+        self.create_home_screen()
 
-    def build(self):
-        tk.Label(self.frame, text="Thank you for using Gradus:", font=("Arial", 16, "bold")).pack(pady=20)
-        tk.Label(self.frame, text="We are aiming to help students to plan their university and career pathways.", wraplength=360, justify="center").pack(pady=10)
-        tk.Label(self.frame, text="Use the top buttons to explore some modules to help you out! \nVersion 1", font=("Arial", 10)).pack(pady=10)
+    def show_remove_interest(self):
+        self.frame_clearing()
+        tk.Label(self.root, text="Enter Interest to Remove:", font=("Arial", 12)).pack(pady=5)
+        entry = tk.Entry(self.root, width=30)
+        entry.pack(pady=5)
+        tk.Button(self.root, text="Remove", command=lambda: self.remove_interest(entry.get())).pack(pady=5)
+        tk.Button(self.root, text="Back", command=self.create_home_screen).pack(pady=10)
 
-#Develop the class for the Grader Checker
-class GradeChecker:
-    def __init__(self, frame):
-        self.frame = frame
-        self.rank_score_entry = tk.Entry(frame)
-        self.course_var = tk.StringVar(frame)
-        self.course_var.set(list(courses.keys())[0])
+    def remove_interest(self, interest):
+        self.user.remove_interest(interest)
+        messagebox.showinfo("Removed", f"Removed interest: {interest}")
+        self.create_home_screen()
 
-    def build(self):
-        tk.Label(self.frame, text="Grade Checker", font=("Arial", 14)).pack(pady=5)
-        tk.Label(self.frame, text="Enter your rank score: ").pack()
-        self.rank_score_entry.pack()
-        course_menu = tk.OptionMenu(self.frame, self.course_var, *courses.keys())
-        course_menu.pack(pady=5)
-        tk.Button(self.frame, text="Check Entry", command=self.grade_check).pack(pady=10)
+    def show_remove_strength(self):
+        self.frame_clearing()
+        tk.Label(self.root, text="Enter Strength to Remove:", font=("Arial", 12)).pack(pady=5)
+        entry = tk.Entry(self.root, width=30)
+        entry.pack(pady=5)
+        tk.Button(self.root, text="Remove", command=lambda: self.remove_strength(entry.get())).pack(pady=5)
+        tk.Button(self.root, text="Back", command=self.create_home_screen).pack(pady=10)
 
-    def grade_check(self):
-        try:
-            rank_score = int(self.rank_score_entry.get())
-            course_selected = self.course_var.get()
-            rank_score_required = courses[course_selected]["rank_score_required"]
+    def remove_strength(self, strength):
+        self.user.remove_strength(strength)
+        messagebox.showinfo("Removed", f"Removed strength: {strength}")
+        self.create_home_screen()
 
-            if rank_score >= rank_score_required and rank_score <= 320:
-                messagebox.showinfo("Result:", f"Congradulations! You have met the rank score entry requirement for {course_selected}")
-            elif rank_score < rank_score_required:
-                messagebox.showinfo("Result:", f"Sorry, but you do NOT meet the entry requirement for {course_selected}")
-            elif rank_score > 320 or rank_score < 0:
-                messagebox.showerror("Error", f"Please enter a smaller but valid rank score.")
-        except ValueError:
-            messagebox.showerror("Error", "Please enter a valid rank score.")
+    def show_profile(self): #Creates the function to show profiles
+        self.frame_clearing()
+        tk.Label(self.root, text="User Profile", font=("Arial", 16, "bold")).pack(pady=10)
+        tk.Label(self.root, text=self.user.get_profile(), font=("Arial", 12), justify="left").pack(pady=10)
+        tk.Button(self.root, text="Back", command=self.create_home_screen).pack(pady=10)
 
-#Develop the class for the Career Planner
-class CareerPlanner:
-    def __init__(self, frame):
-        self.frame = frame
-        self.user_interest_var = tk.StringVar(frame)
-        self.user_interest_var.set(list(career_options.keys())[0])
-    
-    def build(self):
-        tk.Label(self.frame, text="Career Planner", font=("Arial", 14)).pack(pady=10)
-        tk.Label(self.frame, text="Select your area of interest!").pack()
-        user_interest_menu = tk.OptionMenu(self.frame, self.user_interest_var, *career_options.keys())
-        user_interest_menu.pack(pady=5)
-        tk.Button(self.frame, text="Suggest Careers", command=self.career_suggestion).pack(pady=10)
+    def show_suggestions(self): #Creates the function to show suggestions
+        self.frame_clearing()
+        tk.Label(self.root, text="Career Suggestions", font=("Arial", 14, "bold")).pack(pady=10)
+        tk.Label(self.root, text=self.planner.suggest_career(), font=("Arial", 12), justify="left").pack(pady=10)
+        tk.Button(self.root, text="Back", command=self.create_home_screen).pack(pady=10)
 
-    def career_suggestion(self):
-        selected_field_of_interest = self.user_interest_var.get()
-        careers = career_options.get(selected_field_of_interest, {})
-        if careers:
-            messagebox.showinfo("Suggested Careers:", f"Some careers that you might be interested include: {', '.join(careers)}")
-        else:
-            messagebox.showerror("Error", "No careers can be suggested for this field of interest.")
-
-#Develop the class for the FROST
-class FROST:
-
-    def __init__(self, frame):
-        self.frame = frame
-        global frostQA
-    
-    def build(self):
-        tk.Label(self.frame, text="FROST", font=("Arial", 14)).pack(pady=10)
-        for question, answer in frostQA.items():
-            tk.Label(self.frame, text=f"Q: {question}", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
-            tk.Label(self.frame, text=f"A: {answer}", wraplength=400, justify="right").pack(anchor="w", padx=20, pady=2)
-
-#Run the app
+#Runs the app
 if __name__ == "__main__":
     root = tk.Tk()
-    app = GradusApp(root)
+    app = CareerPlannerApp(root)
+    root.geometry("600x700")
     root.mainloop()
